@@ -13,14 +13,25 @@ export const HF_API_KEY = process.env.HF_API_KEY;
  * @returns API response data
  */
 export async function makeHfRequest(url: string, body?: string) {
+    if (!HF_API_KEY) {
+        console.error('HF_API_KEY is not defined');
+        return {
+            statusCode: 500,
+            message: 'API key is missing',
+        };
+    }
+
     const headers = {
         "Authorization": `Bearer ${HF_PARTNER_KEY}:${HF_API_KEY}`,
         "Content-Type": "application/json"
     };
 
+    console.error(`Making request to ${url}`);
+    
     try {
         let response;
         if (body) {
+            console.error('POST request with body');
             response = await fetch(url, {
                 method: 'POST',
                 headers, 
@@ -28,6 +39,7 @@ export async function makeHfRequest(url: string, body?: string) {
                 timeout: 30000
             });
         } else {
+            console.error('GET request');
             response = await fetch(url, {
                 method: 'GET',
                 headers,
@@ -35,21 +47,24 @@ export async function makeHfRequest(url: string, body?: string) {
             });
         }
 
+        console.error(`Response status: ${response.status}`);
         const responseText = await response.text();
         
         try {
             return responseText ? JSON.parse(responseText) : null;
         } catch (jsonError) {
+            console.error('Error parsing JSON response:', jsonError);
+            console.error('Raw response:', responseText);
             return {
                 statusCode: response.status,
                 message: responseText,
             };
         }
     } catch (error) {
-        // Remove console.error - it breaks MCP Inspector
+        console.error('Network error in makeHfRequest:', error);
         return {
             statusCode: 500,
-            message: 'Network error',
+            message: `Network error: ${error instanceof Error ? error.message : String(error)}`,
         };
     }
 } 

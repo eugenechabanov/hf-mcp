@@ -110,16 +110,31 @@ server.tool(
   }
 );
 
+// Register global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Don't exit the process
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  // Don't exit the process
+});
+
 // Main function to start the server
 async function main() {
   try {
     // Create WebSocket transport
     const transport = new WebSocketServerTransport(PORT);
     
+    // Log startup information
+    console.error(`Starting Hypefury MCP server on port ${PORT}`);
+    
     // Start transport and connect server to it
     await transport.start();
     await server.connect(transport);
     
+    console.error('Server started successfully');
     
     // Keep the server running
     process.on('SIGINT', async () => {
@@ -135,7 +150,10 @@ async function main() {
     });
   } catch (error) {
     console.error("Fatal error in main():", error);
-    process.exit(1);
+    // Don't exit the process in Smithery environment
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 }
 
