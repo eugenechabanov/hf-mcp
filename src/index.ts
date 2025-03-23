@@ -113,8 +113,6 @@ server.tool(
 // Main function to start the server
 async function main() {
   try {
-    console.log(`Starting Hypefury MCP Server on port ${PORT}`);
-    
     // Create WebSocket transport
     const transport = new WebSocketServerTransport(PORT);
     
@@ -122,7 +120,6 @@ async function main() {
     await transport.start();
     await server.connect(transport);
     
-    console.log(`Hypefury MCP Server is running on port ${PORT}`);
     
     // Keep the server running
     process.on('SIGINT', async () => {

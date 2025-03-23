@@ -16,8 +16,6 @@ export class WebSocketServerTransport {
     this.wsServer = new WebSocketServer({ port });
     
     this.wsServer.on('connection', (ws) => {
-      console.log('Client connected to WebSocket server');
-      
       // Store the active connection
       this.activeConnection = ws;
       
@@ -27,29 +25,23 @@ export class WebSocketServerTransport {
           const parsedMessage = JSON.parse(message.toString());
           this.messageEmitter.emit('message', parsedMessage);
         } catch (error) {
-          console.error('Error parsing message:', error);
+          // Silent error handling
         }
       });
       
       // Handle connection close
       ws.on('close', () => {
-        console.log('Client disconnected from WebSocket server');
         if (this.activeConnection === ws) {
           this.activeConnection = null;
         }
       });
       
-      // Handle errors
-      ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-      });
+      // Handle errors silently
+      ws.on('error', () => {});
     });
     
-    this.wsServer.on('error', (error) => {
-      console.error('WebSocket server error:', error);
-    });
-    
-    console.log(`WebSocket server started on port ${port}`);
+    // Handle server errors silently
+    this.wsServer.on('error', () => {});
   }
 
   /**
@@ -65,7 +57,7 @@ export class WebSocketServerTransport {
    */
   async send(message: unknown): Promise<void> {
     if (!this.activeConnection) {
-      console.warn('No active WebSocket connection to send message to');
+      // No active connection, silently fail
       return;
     }
     
@@ -73,7 +65,7 @@ export class WebSocketServerTransport {
       const serializedMessage = JSON.stringify(message);
       this.activeConnection.send(serializedMessage);
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Silent error handling
       throw error;
     }
   }

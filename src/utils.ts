@@ -12,40 +12,44 @@ export const HF_API_KEY = process.env.HF_API_KEY;
  * @param body Optional request body for POST requests
  * @returns API response data
  */
-export async function makeHfRequest(url: string, body?: string): Promise<any | null> {
-  const headers = {
-    "Authorization": `Bearer ${HF_PARTNER_KEY}:${HF_API_KEY}`,
-    "Content-Type": "application/json"
-  };
-
-  try {
-    let response;
-    if (body) {
-      response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body,
-        timeout: 30000
-      });
-    } else {
-      response = await fetch(url, {
-        method: 'GET',
-        headers,
-        timeout: 30000
-      });
-    }
-    const responseText = await response.text();
+export async function makeHfRequest(url: string, body?: string) {
+    const headers = {
+        "Authorization": `Bearer ${HF_PARTNER_KEY}:${HF_API_KEY}`,
+        "Content-Type": "application/json"
+    };
 
     try {
-      return responseText ? JSON.parse(responseText) : null;
-    } catch (jsonError) {
-      return {
-        statusCode: response.status,
-        message: responseText,
-      };
+        let response;
+        if (body) {
+            response = await fetch(url, {
+                method: 'POST',
+                headers, 
+                body,
+                timeout: 30000
+            });
+        } else {
+            response = await fetch(url, {
+                method: 'GET',
+                headers,
+                timeout: 30000
+            });
+        }
+
+        const responseText = await response.text();
+        
+        try {
+            return responseText ? JSON.parse(responseText) : null;
+        } catch (jsonError) {
+            return {
+                statusCode: response.status,
+                message: responseText,
+            };
+        }
+    } catch (error) {
+        // Remove console.error - it breaks MCP Inspector
+        return {
+            statusCode: 500,
+            message: 'Network error',
+        };
     }
-  } catch (error) {
-    console.error("Error making request:", error);
-    return null;
-  }
 } 
