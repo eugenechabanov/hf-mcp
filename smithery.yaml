@@ -28,4 +28,25 @@ metadata:
         - name: message
           type: string
           description: The message content to post
-          required: true 
+          required: true
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      apiKey:
+        type: string
+        title: Hypefury API Key
+        description: API Key for authenticating with Hypefury
+    required: ["apiKey"]
+  commandFunction: |
+    function(config) {
+      return {
+        command: "node",
+        args: ["build/index.js"],
+        env: {
+          HF_API_KEY: config.apiKey
+        }
+      };
+    } 
