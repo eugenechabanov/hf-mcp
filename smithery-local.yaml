@@ -1,0 +1,22 @@
+name: hypefury-mcp-local
+description: Hypefury MCP server for local testing
+version: 1.0.0
+
+runtime:
+  command: node
+  args:
+    - build/local.js
+  env:
+    HF_API_KEY: "${HF_API_KEY}"
+
+metadata:
+  tools:
+    - name: auth
+      description: Authenticate with Hypefury
+    - name: schedule_post
+      description: Schedule a post to be published via Hypefury
+      parameters:
+        - name: message
+          type: string
+          description: The message content to post
+          required: true 

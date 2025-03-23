@@ -1,0 +1,31 @@
+name: hypefury-mcp
+description: Hypefury MCP server for scheduling social media posts
+version: 1.0.0
+repository: https://github.com/username/hypefury-mcp-server
+license: MIT
+
+# Build configuration
+build:
+  dockerfile: Dockerfile
+  context: .
+
+# Runtime configuration
+runtime:
+  port: 8080
+  # Timeout in minutes
+  timeout: 5
+  # Memory in MB
+  memory: 128
+
+# Metadata for the MCP server
+metadata:
+  tools:
+    - name: auth
+      description: Authenticate with Hypefury
+    - name: schedule_post
+      description: Schedule a post to be published via Hypefury
+      parameters:
+        - name: message
+          type: string
+          description: The message content to post
+          required: true 
