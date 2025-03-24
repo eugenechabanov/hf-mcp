@@ -1,3 +1,6 @@
+build:
+  dockerBuildPath: .
+  dockerfile: Dockerfile
 startCommand:
   type: stdio
   configSchema:
@@ -10,12 +13,12 @@ startCommand:
     required: ["apiKey"]
   commandFunction:
     |-
-    (config) => {
+    (config) => ({
         "command": "node",
         "args": ["build/index.js"],
         "env": {
           "HF_API_KEY": config.apiKey
         }
-    }
+    })
   example_config:
     apiKey: "123456-7890-11f0-ba9c-efb08f0fe681"
