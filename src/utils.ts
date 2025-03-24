@@ -51,13 +51,15 @@ export async function makeHfRequest(url: string, body?: string) {
         const responseText = await response.text();
         
         try {
-            return responseText ? JSON.parse(responseText) : null;
-        } catch (jsonError) {
-            console.error('Error parsing JSON response:', jsonError);
-            console.error('Raw response:', responseText);
             return {
                 statusCode: response.status,
-                message: responseText,
+                message: responseText || null
+            };
+        } catch (error) {
+            console.error('Error handling response:', error);
+            return {
+                statusCode: response.status,
+                message: null
             };
         }
     } catch (error) {

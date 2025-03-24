@@ -1,21 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import dotenv from 'dotenv';
-import { WebSocketServerTransport } from './websocket.js';
 import { makeHfRequest, HF_AUTH_ENDPOINT, HF_SCHEDULE_ENDPOINT } from './utils.js';
 
-// Load environment variables
-dotenv.config();
-
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080;
-
-// Create the MCP server
 const server = new McpServer({
   name: "Hypefury MCP",
   version: "1.0.0",
 });
 
-// Authentication tool
+
 server.tool(
   "auth",
   "Authenticate with Hypefury",
@@ -74,7 +67,6 @@ server.tool(
   }
 );
 
-// Post scheduling tool
 server.tool(
   "schedule_post",
   "Schedule a post to be published via Hypefury",
@@ -82,11 +74,11 @@ server.tool(
     message: z.string().describe("The message content to post")
   },
   async ({ message }: { message: string }) => {
-    const data = JSON.stringify({
-      text: message,
-    });
+    const postData = {
+      text: message
+    };
 
-    const response = await makeHfRequest(HF_SCHEDULE_ENDPOINT, data);
+    const response = await makeHfRequest(HF_SCHEDULE_ENDPOINT, JSON.stringify(postData));
     
     if (!response) {
       return {
@@ -103,59 +95,13 @@ server.tool(
       content: [
         {
           type: "text",
-          text: "Post scheduled successfully.",
+          text: "Post scheduled successfully."
         }
       ]
     };
   }
 );
 
-// Register global error handlers
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  // Don't exit the process
-});
+const transport = new StdioServerTransport();
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Promise Rejection:', reason);
-  // Don't exit the process
-});
-
-// Main function to start the server
-async function main() {
-  try {
-    // Create WebSocket transport
-    const transport = new WebSocketServerTransport(PORT);
-    
-    // Log startup information
-    console.error(`Starting Hypefury MCP server on port ${PORT}`);
-    
-    // Start transport and connect server to it
-    await transport.start();
-    await server.connect(transport);
-    
-    console.error('Server started successfully');
-    
-    // Keep the server running
-    process.on('SIGINT', async () => {
-      console.log('Shutting down server...');
-      await transport.close();
-      process.exit(0);
-    });
-    
-    process.on('SIGTERM', async () => {
-      console.log('Shutting down server...');
-      await transport.close();
-      process.exit(0);
-    });
-  } catch (error) {
-    console.error("Fatal error in main():", error);
-    // Don't exit the process in Smithery environment
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
-  }
-}
-
-// Start the server
-main(); 
+server.connect(transport); 
